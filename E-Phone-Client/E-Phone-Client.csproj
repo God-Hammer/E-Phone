@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\E-Phone-Library\E-Phone-Library.csproj" />
   </ItemGroup>
 

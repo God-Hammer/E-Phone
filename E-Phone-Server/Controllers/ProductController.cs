@@ -7,15 +7,15 @@ namespace E_Phone_Server.Controllers
 {
     [Route("api/products")]
     [ApiController]
-    public class ProductController : ControllerBase
+    public class ProductController(IProduct _product) : ControllerBase
     {
-        private readonly IProduct _product;
+        //private readonly IProduct _product;
 
         
-        public ProductController(IProduct product)
-        {
-            _product = product;
-        }
+        //public ProductController(IProduct product)
+        //{
+        //    _product = product;
+        //}
 
         //Get all product
         [HttpGet]
