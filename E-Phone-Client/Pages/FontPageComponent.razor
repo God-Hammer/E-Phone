@@ -1,0 +1,108 @@
+﻿@page "/list-products"
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            @if (FeatureProducts!.Any())
+            {
+                <div class="control-container text-dark">
+                    <SfCarousel ButtonsVisibility="CarouselButtonVisibility.VisibleOnHover" AnimationEffect="CarouselAnimationEffect.Slide" AutoPlay="true" ShowIndicators="true">
+                        <ChildContent>
+                            @foreach (Product product in FeatureProducts!.OrderByDescending(product => product.DateUpload).Take(5))
+                            {
+                                <CarouselItem>
+                                    <figure class="img-container">
+                                        <img src="@product.Base64Img" width="250" height="380" class="float-end" />
+                                    </figure>
+                                    <div class="d-flex justify-content-center">
+                                        <div style="position:absolute; bottom:50px">
+                                            <div class="vstack gap-3 mb-3">
+                                                <div>
+                                                    <p>
+                                                        <span style="font-family:impact; text-indent:2px" class="text-dark fw-bold display-2">
+                                                            @product.Name
+                                                            <sup style="font-family:'Courier New'">
+                                                                <span class="badge rounded-pill bg-primary fs-6">@(GetNewLabel(product.DateUpload))</span>
+                                                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-family:sans-serif">
+                                                                    @((product.Quantity - 1) > 0 ? $"{product.Quantity - 1}+" : product.Quantity)
+                                                                    <span class="visually-hidden">Unread message</span>
+                                                                </span>
+                                                            </sup>
+                                                        </span>
+                                                    </p>
+                                                </div>
+
+                                                <p class="text-muted fs-5 w-75" style="text-align:justify-all; font-family:Cambria">@(GetDescription(product.Description!))</p>
+                                            </div>
+                                            <div class="hstack gap-1 d-flex justify-content-center">
+                                                <button class="btn btn-secondary fw-bold" id="@($"listButton_{product.Id}")"><i class="fa fa-list"></i></button>
+                                                <button class="btn btn-outline-danger fw-bold" id="@($"buyButton_{product.Id}")"><i class="fa fa-cart-plus"></i>BUY NOW</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CarouselItem>
+                            }
+                        </ChildContent>
+                        <PreviousButtonTemplate>
+                            <img src="../resources/lessthan.png" width="50" height="50" id="styleCursor" />
+                        </PreviousButtonTemplate>
+                        <NextButtonTemplate>
+                            <img src="../resources/greaterthan.png" width="50" height="50" id="styleCursor" />
+                        </NextButtonTemplate>
+                        <IndicatorsTemplate>
+                            <div class="indicators"></div>
+                        </IndicatorsTemplate>
+                    </SfCarousel>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">No Product Available</div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    List<Product>? FeatureProducts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RetrieveFeatureProducts();
+    }
+
+    private async Task RetrieveFeatureProducts()
+    {
+        FeatureProducts?.Clear();
+        bool feature = true;
+        var result = await ClientService.GetProducts(feature);
+
+        if(result is null)
+        {
+            return;
+        }
+
+        var products = result.ToList();
+        foreach(var product in products)
+        {
+            FeatureProducts!.Add(product);
+        }
+    }
+
+    string GetNewLabel(DateTime date)
+    {
+        int maxDays = 30;
+        int productDateAfterUpload = (DateTime.Now - date).Days;
+        return productDateAfterUpload <= maxDays ? "New" : null!;
+    }
+
+    string GetDescription(string description)
+    {
+        string appendDots = "...";
+        int maxLength = 40;
+        int descriptionLength = description.Length;
+        return descriptionLength > maxLength ? $"{description.Substring(0, 100)}{appendDots}" : description;
+    }
+}
